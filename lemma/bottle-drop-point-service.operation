@@ -1,0 +1,38 @@
+/*
+ * Deployment model for assignment purposes.
+ * The current implementation is run locally, but the service is modeled
+ * as a Docker container according to Task 6 requirements.
+ */
+
+import microservices from "./bottle-drop-point-service.services" as dropPointServices
+import technology from "./Docker.technology" as docker
+import technology from "./Java.technology" as java
+
+technology docker
+technology java
+
+container BottleDropPointServiceContainer
+    deployment technology docker_deployment_Docker
+    deploys dropPointServices.BottleDropPointService {
+        aspects {
+            docker_aspects_Dockerfile(
+'
+CMD java ${JAVA_OPTS} -jar bottle-drop-point-service.jar
+COPY bottle-drop-point-service.jar .
+'
+            );
+        }
+
+        default values {
+            basic endpoints {
+                java_protocols_rest http://localhost:8080
+            }
+        }
+    }
+
+discovery EurekaDiscovery
+    is java_infrastructure_serviceDiscovery with operation environment eureka
+    used by services dropPointServices.BottleDropPointService
+    endpoints {
+        java_protocols_rest http://localhost:8761/eureka
+    }

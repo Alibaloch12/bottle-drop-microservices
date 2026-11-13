@@ -1,0 +1,25 @@
+import data from "bottle-drop-point-service.data" as Domain
+
+microservice BottleDropPointService {
+    interface DropPointApi {
+        operation listDropPoints() : Domain.BottleDropPoint[]
+
+        operation submitReturn(
+            input bottleReturn : Domain.BottleReturn
+        ) : Domain.BottleReturn
+
+        operation reportFull(
+            input reportRequest : Domain.ReportRequest
+        ) : Domain.ReportRequest
+
+        operation emptyDropPoint(
+            input dropPoint : Domain.BottleDropPoint
+        ) : Domain.BottleDropPoint
+
+        operation listReports() : Domain.ReportRequest[]
+
+        operation resolveReport(
+            input reportRequest : Domain.ReportRequest
+        ) : Domain.ReportRequest
+    }
+}

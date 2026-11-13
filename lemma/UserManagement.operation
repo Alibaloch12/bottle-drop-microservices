@@ -1,0 +1,17 @@
+import microservices from "UserManagement.service" as UserManagementService
+import technology from "Docker.technology" as Docker
+
+@technology(Docker)
+container UserContainer {
+    deployment technology Docker::_deployment.Docker
+    deploys UserManagementService::UserManagementService {
+        aspects {
+            Docker::_aspects.Dockerfile(
+                '
+                CMD java ${JAVA_OPTS} -jar user-management-service.jar
+                COPY $$$user-management-service$$$.jar .
+                '
+            );
+        }
+    }
+}

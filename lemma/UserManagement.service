@@ -1,0 +1,36 @@
+import datatypes from "UserManagement.domain" as UserManagementContext
+import technology from "Generic.technology" as generic
+
+@technology(generic)
+@endpoints(generic::_protocols.rest: "/api/users")
+public architecture UserManagementService {
+    
+    interface UserController {
+        @endpoints(generic::_protocols.rest: "/")
+        public getUsers();
+        
+        @endpoints(generic::_protocols.rest: "/")
+        public createUser();
+
+        @endpoints(generic::_protocols.rest: "/{id}")
+        public getUserById();
+
+        @endpoints(generic::_protocols.rest: "/{id}")
+        public updateUser();
+
+        @endpoints(generic::_protocols.rest: "/{id}/deactivate")
+        public deactivateUser();
+
+        @endpoints(generic::_protocols.rest: "/{id}/activate")
+        public activateUser();
+
+        @endpoints(generic::_protocols.rest: "/{id}/change-password")
+        public changePassword();
+
+        @endpoints(generic::_protocols.rest: "/login")
+        public login();
+
+        @endpoints(generic::_protocols.rest: "/{id}/purchases")
+        public getMockedUserPurchases();
+    }
+}

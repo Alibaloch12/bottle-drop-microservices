@@ -1,0 +1,71 @@
+import datatypes from "./purchase.data" as purchase
+import technology from "./Java.technology" as java
+
+technology java
+sync java_protocols_rest
+public functional microservice purchase.service.PurchaseService
+    endpoints java_protocols_rest purchases {
+
+    interface PurchaseManagement {
+
+        ---
+        Create a new purchase.
+        required request Purchase creation payload.
+        ---
+        createPurchase(
+            sync in request purchase.VisitorPurchasing.v1.CreatePurchaseRequest,
+            sync out purchaseResponse purchase.VisitorPurchasing.v1.PurchaseResponse,
+            sync out fault error purchase.VisitorPurchasing.v1.ApiError
+        )
+
+        ---
+        Return a purchase by id.
+        required id Purchase identifier.
+        ---
+        getPurchaseById(
+            sync in id long,
+            sync out purchaseResponse purchase.VisitorPurchasing.v1.PurchaseResponse,
+            sync out fault error purchase.VisitorPurchasing.v1.ApiErrorResponse
+        )
+
+        ---
+        Return all purchases or filter them by visitorId and/or barId.
+        param visitorId Optional visitor filter.
+        param barId Optional bar filter.
+        ---
+        getPurchases(
+            sync in visitorId? long,
+            sync in barId? long,
+            sync out purchases purchase.VisitorPurchasing.v1.PurchaseResponse
+        )
+
+        ---
+        Update a purchase.
+        required id Purchase identifier.
+        required request Updated purchase payload.
+        ---
+        updatePurchase(
+            sync in id long,
+            sync in request purchase.VisitorPurchasing.v1.UpdatePurchaseRequest,
+            sync out purchaseResponse purchase.VisitorPurchasing.v1.PurchaseResponse,
+            sync out fault error purchase.VisitorPurchasing.v1.ApiError
+        )
+
+        ---
+        Delete a purchase.
+        required id Purchase identifier.
+        ---
+        deletePurchase(
+            sync in id long,
+            sync out fault error purchase.VisitorPurchasing.v1.ApiError
+        )
+    }
+
+    /*
+     * Intended dependency only:
+     * purchase-service is planned to call bar-service to record sales and decrement
+     * stock after successful purchase creation. This integration is currently disabled
+     * in the Java code because purchase-service uses Long identifiers while the current
+     * bar-service contract expects UUID-based identifiers.
+     */
+}

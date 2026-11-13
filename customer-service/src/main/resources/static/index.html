@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1"
+    >
+
+    <meta
+            name="description"
+            content="Bottle Drop customer ordering interface"
+    >
+
+    <title>Bottle Drop | Customer Order</title>
+
+    <link
+            rel="stylesheet"
+            href="/css/styles.css"
+    >
+</head>
+
+<body>
+
+<header class="page-header">
+    <div class="page-header__content">
+        <div>
+            <p class="eyebrow">
+                Bottle Drop Event System
+            </p>
+
+            <h1 id="bar-name">
+                Customer Bar
+            </h1>
+
+            <p
+                    id="bar-location"
+                    class="bar-location"
+            >
+                Enter a bar ID to load available products.
+            </p>
+        </div>
+
+        <div class="header-badge">
+            Customer ordering
+        </div>
+    </div>
+</header>
+
+<main class="page-container">
+
+    <section class="panel visitor-panel">
+        <div class="panel-heading">
+            <div>
+                <p class="section-label">
+                    Step 1
+                </p>
+
+                <h2>Select customer and bar</h2>
+            </div>
+        </div>
+
+        <div class="selection-grid">
+
+            <label class="form-field">
+                <span>Visitor ID</span>
+
+                <input
+                        id="visitor-id"
+                        type="number"
+                        min="1"
+                        step="1"
+                        inputmode="numeric"
+                        placeholder="Example: 3"
+                        required
+                >
+            </label>
+
+            <label class="form-field">
+                <span>Bar ID</span>
+
+                <input
+                        id="bar-id"
+                        type="number"
+                        min="1"
+                        step="1"
+                        inputmode="numeric"
+                        placeholder="Example: 1"
+                        required
+                >
+            </label>
+
+            <button
+                    id="load-products-button"
+                    class="button button--primary load-button"
+                    type="button"
+            >
+                Load products
+            </button>
+
+        </div>
+
+        <p
+                id="catalog-message"
+                class="message"
+                aria-live="polite"
+        ></p>
+    </section>
+
+    <div class="content-layout">
+
+        <section class="panel products-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-label">
+                        Step 2
+                    </p>
+
+                    <h2>Available products</h2>
+                </div>
+
+                <button
+                        id="refresh-products-button"
+                        class="button button--secondary"
+                        type="button"
+                        disabled
+                >
+                    Refresh
+                </button>
+            </div>
+
+            <div
+                    id="product-list"
+                    class="product-grid"
+            >
+                <div class="empty-state">
+                    <h3>No catalogue loaded</h3>
+
+                    <p>
+                        Enter a bar ID and select
+                        “Load products”.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <aside class="panel cart-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-label">
+                        Step 3
+                    </p>
+
+                    <h2>Your cart</h2>
+                </div>
+
+                <span
+                        id="cart-count"
+                        class="cart-count"
+                >
+                    0 items
+                </span>
+            </div>
+
+            <div
+                    id="cart-items"
+                    class="cart-items"
+            >
+                <div class="empty-state empty-state--small">
+                    <p>Your cart is empty.</p>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Products</span>
+
+                    <strong id="cart-product-count">
+                        0
+                    </strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Total quantity</span>
+
+                    <strong id="cart-quantity-count">
+                        0
+                    </strong>
+                </div>
+
+                <div class="summary-row summary-row--total">
+                    <span>Estimated total</span>
+
+                    <strong id="cart-total">
+                        €0.00
+                    </strong>
+                </div>
+            </div>
+
+            <button
+                    id="checkout-button"
+                    class="button button--checkout"
+                    type="button"
+                    disabled
+            >
+                Place order
+            </button>
+
+            <button
+                    id="clear-cart-button"
+                    class="button button--text"
+                    type="button"
+                    disabled
+            >
+                Clear cart
+            </button>
+
+            <p class="cart-note">
+                The final price and stock availability
+                are validated by the server during checkout.
+            </p>
+
+        </aside>
+
+    </div>
+
+    <section
+            id="order-section"
+            class="panel order-result-panel"
+    >
+        <div class="panel-heading">
+            <div>
+                <p class="section-label">
+                    Order result
+                </p>
+
+                <h2>Latest order</h2>
+            </div>
+        </div>
+
+        <div
+                id="order-result"
+                class="order-result empty-state"
+                aria-live="polite"
+        >
+            <p>No order has been placed yet.</p>
+        </div>
+    </section>
+
+</main>
+
+<div
+        id="toast"
+        class="toast"
+        role="status"
+        aria-live="polite"
+></div>
+
+<script src="/js/app.js"></script>
+
+</body>
+</html>

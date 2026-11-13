@@ -1,0 +1,38 @@
+/*
+ * Deployment model for assignment purposes.
+ * The current implementation is run locally, but the service is modeled
+ * as a Docker container according to Task 6 requirements.
+ */
+
+import microservices from "./purchase.services" as purchaseServices
+import technology from "./Docker.technology" as docker
+import technology from "./Java.technology" as java
+
+technology docker
+technology java
+
+container PurchaseServiceContainer
+    deployment technology docker_deployment_Docker
+    deploys purchaseServices.purchase.service.PurchaseService {
+        aspects {
+            docker_aspects_Dockerfile(
+'
+CMD java ${JAVA_OPTS} -jar purchase-service.jar
+COPY purchase-service.jar .
+'
+            );
+        }
+
+        default values {
+            basic endpoints {
+                java_protocols_rest http://localhost:8089
+            }
+        }
+    }
+
+discovery EurekaDiscovery
+    is java_infrastructure_serviceDiscovery with operation environment eureka
+    used by services purchaseServices.purchase.service.PurchaseService
+    endpoints {
+        java_protocols_rest http://localhost:8761/eureka
+    }

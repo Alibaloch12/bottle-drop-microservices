@@ -1,0 +1,332 @@
+services:
+
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: bar_management_db
+      MYSQL_USER: springuser
+      MYSQL_PASSWORD: secret_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservice-network
+
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservice-network
+
+
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: native
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8888/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservice-network
+
+
+  user-management-service:
+    build:
+      context: ./user-management-service
+      dockerfile: Dockerfile
+    container_name: user-management-service
+    ports:
+      - "8081:8081"
+    volumes:
+      - user_h2_data:/app/data
+    environment:
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8081/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - microservice-network
+
+
+  bar-management-service:
+    build:
+      context: ./bar-management-service
+      dockerfile: Dockerfile
+    container_name: bar-management-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+
+      DB_HOST: mysqldb
+      DB_PORT: "3306"
+      DB_NAME: bar_management_db
+      DB_USER: springuser
+      DB_PASSWORD: secret_password
+
+      INTERNAL_API_KEY: dev-internal-key
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8083/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 80s
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-management-service:
+        condition: service_healthy
+    networks:
+      - microservice-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      bar-management-service:
+        condition: service_healthy
+      user-management-service:
+        condition: service_healthy
+    networks:
+      - microservice-network
+
+#  purchase-service:
+#    build:
+#      context: ./purchase-service
+#      dockerfile: Dockerfile
+#    container_name: purchase-service
+#    ports:
+#      - "8089:8089"
+#    environment:
+#      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
+#      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+#      BAR_SERVICE_BASE_URL: http://bar-management-service:8083
+#    depends_on:
+#      config-server:
+#        condition: service_healthy
+#      eureka-server:
+#        condition: service_healthy
+#      bar-management-service:
+#        condition: service_healthy
+#    networks:
+#      - microservice-network
+
+volumes:
+  mysql_data:
+  user_h2_data:
+
+networks:
+  microservice-network:
+    driver: bridge
+#services:
+#  # 1. Database Engine Service
+#  mysqldb:
+#    image: mysql:8.0
+#    container_name: mysql-container
+#    restart: unless-stopped
+#    ports:
+#      - "3306:3306"
+#    environment:
+#      MYSQL_ROOT_PASSWORD: secret
+#      MYSQL_DATABASE: appdb
+#      MYSQL_USER: springuser
+#      MYSQL_PASSWORD: secret_password
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#    healthcheck:
+#      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - microservice-network
+#
+#  # 2. Configuration Server
+#  config-server:
+#    build:
+#      context: ./config-server
+#      dockerfile: Dockerfile
+#    container_name: config-server
+#    ports:
+#      - "8888:8888"
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=native
+#      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+#      - EUREKA_CLIENT_FETCH_REGISTRY=false
+#      - SERVICES_INTERNAL_API_KEY=dev-internal-key
+#    healthcheck:
+#      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    depends_on:
+#      eureka-server:
+#        condition: service_healthy
+#    networks:
+#      - microservice-network
+#
+#  # 3. Service Registry (Starts after Config Server is healthy)
+#  eureka-server:
+#    build:
+#      context: ./eureka-server
+#      dockerfile: Dockerfile
+#    container_name: eureka-server
+#    ports:
+#      - "8761:8761"
+#    environment:
+#      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+#      - EUREKA_CLIENT_FETCH_REGISTRY=false
+#    healthcheck:
+#      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - microservice-network
+#
+#  # 4. Bar Management Business Service (Starts after DB, Config, and Eureka are healthy)
+#  bar-management-service:
+#    build:
+#      context: ./bar-management-service
+#      dockerfile: Dockerfile
+#    container_name: bar-management-service
+#    ports:
+#      - "8083:8083"
+#    environment:
+#      # Microservice discovery variables
+#      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888/
+#      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+#
+#      # MySQL connection variables injected into Spring Boot
+#      - DB_HOST=mysqldb
+#      - DB_PORT=3306
+#      - DB_NAME=appdb
+#      - DB_USER=root
+#      - DB_PASSWORD=secret
+#
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 8083 || exit 1" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 40s
+#    depends_on:
+#      mysqldb:
+#        condition: service_healthy
+#      config-server:
+#        condition: service_healthy
+#      eureka-server:
+#        condition: service_healthy
+#      user-management-service:
+#        condition: service_healthy
+#    networks:
+#      - microservice-network
+#
+#  user-management-service:
+#    build:
+#      context: ./user-management-service
+#      dockerfile: Dockerfile
+#    container_name: user-management-service
+#    ports:
+#      - "8081:8081"
+#    volumes:
+#      - user_h2_data:/app/data
+#    environment:
+#      # Microservice discovery variables
+#      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888/
+#      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 8081 || exit 1" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 40s
+#    depends_on:
+#      config-server:
+#        condition: service_healthy
+#      eureka-server:
+#        condition: service_healthy
+#    networks:
+#      - microservice-network
+#
+#  frontend-nodejs:
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    container_name: nodejs-app
+#    restart: unless-stopped
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - NODE_ENV=production
+#      - BAR_SERVICE_URL=http://bar-management-service:8083/
+#      - USER_SERVICE_URL=http://user-management-service:8081/
+#    depends_on:
+#      bar-management-service:
+#        condition: service_healthy
+#      user-management-service:
+#        condition: service_healthy
+#    networks:
+#      - microservice-network
+#
+#
+#volumes:
+#  mysql_data:
+#  user_h2_data:
+#
+#networks:
+#  microservice-network:
+#    driver: bridge

@@ -1,0 +1,235 @@
+context BarManagement {
+
+    // ------------------------------------------------------
+    // Domain entities and value objects
+    // ------------------------------------------------------
+
+    // @Entity
+    // @Table(name = "bars")
+    structure Bar<aggregate, entity> {
+        // @Id
+        // @GeneratedValue(strategy = GenerationType.IDENTITY)
+        long id<identifier>,
+
+        string name,
+        string description,
+        string location,
+
+        // @Version
+        long version,
+
+        // @OneToMany(mappedBy = "bar", cascade = CascadeType.ALL, orphanRemoval = true)
+        BarBeverageStocks stocks
+    }
+
+    // @Entity
+    // @Table(name = "bar_beverage_stocks")
+    // @UniqueConstraint(name = "uk_bar_beverage_type", columnNames = {"bar_id", "beverage_type_id"})
+    structure BarBeverageStock<entity> {
+        // @Id
+        // @GeneratedValue(strategy = GenerationType.IDENTITY)
+        long id<identifier>,
+
+        // @Embedded
+        BeverageType beverageType<part>,
+
+        int quantity,
+        int restockThreshold,
+
+        // @Version
+        long version
+    }
+
+    // @Embeddable
+    structure BeverageType<valueObject> {
+        // @Column(name = "beverage_type_id")
+        immutable long id<identifier>,
+
+        // @Column(name = "beverage_name")
+        immutable string name,
+
+        // Java type: BigDecimal
+        // @Column(name = "beverage_price", precision = 10, scale = 2)
+        immutable double price
+    }
+
+    // @Entity
+    // @Table(name = "replenishment_requests")
+    structure ReplenishmentRequest<entity> {
+        // @Id
+        // @GeneratedValue(strategy = GenerationType.IDENTITY)
+        long id<identifier>,
+
+        long barId,
+
+        // @Embedded
+        BeverageType beverageType<part>,
+
+        int quantityRequested,
+        ReplenishmentStatus status,
+
+        date requestedAt,
+        date decidedAt,
+
+        long warehouseRequestId,
+        int deliveredQuantity
+    }
+
+    enum ReplenishmentStatus {
+        REQUESTED,
+        ACCEPTED,
+        REJECTED,
+        COMPLETED
+    }
+
+    collection BarBeverageStocks { BarBeverageStock stock }
+    collection Bars { Bar bar }
+    collection ReplenishmentRequests { ReplenishmentRequest request }
+
+
+    // ------------------------------------------------------
+    // API request and response structures
+    // ------------------------------------------------------
+
+    structure CreateBarRequest<valueObject> {
+        immutable string name,
+        immutable string description,
+        immutable string location
+    }
+
+    structure UpdateBarRequest<valueObject> {
+        immutable string name,
+        immutable string description,
+        immutable string location
+    }
+
+    structure AddStockRequest<valueObject> {
+        immutable long beverageTypeId,
+        immutable string beverageName,
+        immutable double price,
+        immutable int initialQuantity,
+        immutable int restockThreshold
+    }
+
+    structure UpdateStockRequest<valueObject> {
+        immutable string beverageName,
+        immutable double price,
+        immutable int quantity,
+        immutable int restockThreshold
+    }
+
+    structure BarResponse<valueObject> {
+        immutable long id,
+        immutable string name,
+        immutable string description,
+        immutable string location,
+        immutable StockResponses stocks
+    }
+
+    structure StockResponse<valueObject> {
+        immutable long beverageTypeId,
+        immutable string beverageName,
+        immutable double price,
+        immutable int quantity,
+        immutable int restockThreshold,
+        immutable boolean belowThreshold
+    }
+
+    collection BarResponses { BarResponse response }
+    collection StockResponses { StockResponse response }
+
+    structure AvailabilityResponse<valueObject> {
+        immutable long barId,
+        immutable long beverageTypeId,
+        immutable string beverageName,
+        immutable double unitPrice,
+        immutable int availableQuantity,
+        immutable boolean available
+    }
+
+    structure RecordSaleRequest<valueObject> {
+        immutable long purchaseId,
+        immutable long visitorId,
+        immutable long beverageTypeId,
+        immutable int quantity
+    }
+
+    structure SaleResponse<valueObject> {
+        immutable long purchaseId,
+        immutable long barId,
+        immutable long beverageTypeId,
+        immutable string beverageName,
+        immutable double unitPrice,
+        immutable int soldQuantity,
+        immutable double totalPrice,
+        immutable int remainingQuantity,
+        immutable boolean belowRestockThreshold,
+        immutable long replenishmentRequestId,
+        immutable string replenishmentStatus
+    }
+
+    structure ReceiveReplenishmentRequest<valueObject> {
+        immutable long replenishmentRequestId,
+        immutable long beverageTypeId,
+        immutable int deliveredQuantity
+    }
+
+    structure ReplenishmentRequestResponse<valueObject> {
+        immutable long id,
+        immutable long barId,
+        immutable long beverageTypeId,
+        immutable string beverageName,
+        immutable double price,
+        immutable int quantityRequested,
+        immutable string status,
+        immutable date requestedAt,
+        immutable date decidedAt,
+        immutable long warehouseRequestId
+    }
+
+    collection ReplenishmentRequestResponses {
+        ReplenishmentRequestResponse response
+    }
+
+
+    // ------------------------------------------------------
+    // Integration DTOs used by Bar Management
+    // ------------------------------------------------------
+
+    structure UserResponse<valueObject> {
+        immutable long userId,
+        immutable string name,
+        immutable string role,
+        immutable boolean active
+    }
+
+    structure WarehouseReplenishmentRequest<valueObject> {
+        immutable long requestId,
+        immutable long barId,
+        immutable long beverageTypeId,
+        immutable string beverageName,
+        immutable int requestedQuantity
+    }
+
+    structure WarehouseReplenishmentResponse<valueObject> {
+        immutable long requestId,
+        immutable string status
+    }
+
+
+    // ------------------------------------------------------
+    // Repository abstractions
+    // ------------------------------------------------------
+
+    structure BarRepository<repository> {
+        Bars bars,
+        function Bar findById(long id),
+        function Bars findAllByOrderByNameAsc
+    }
+
+    structure ReplenishmentRequestRepository<repository> {
+        ReplenishmentRequests requests,
+        function ReplenishmentRequest findById(long id),
+        function ReplenishmentRequests findByBarIdOrderByRequestedAtDesc(long barId)
+    }
+}

@@ -1,0 +1,259 @@
+import datatypes from ".bar-management.data" as domain
+
+public functional microservice com.example.barmanagement.BarManagementService {
+
+    interface barController{
+        ---
+        Create a new event bar.
+
+        @required requestDto the bar information to be created
+        ---
+        createBar(
+            sync requestDto : domain::BarManagement.CreateBarRequest,
+            sync out responseDto : domain::BarManagement.BarResponse,
+            sync out fault forbidden : string,
+            sync out fault invalidRequest : string
+        );
+
+        ---
+        Get all bars visible to the current actor.
+
+        ---
+        getAllBars(
+            sync out responseDtos : domain::BarManagement.BarResponses,
+            sync out fault forbidden : string
+        );
+
+        ---
+        Get the current status of a specific bar.
+
+        @required barId the unique id of the bar
+        ---
+        getBar(
+            sync barId : long,
+            sync out responseDto : domain::BarManagement.BarResponse,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string
+        );
+
+        ---
+        Update the master data of an existing bar.
+
+        @required barId the unique id of the bar
+        @required requestDto the updated bar information
+        ---
+        updateBar(
+            sync barId : long,
+            sync requestDto : domain::BarManagement.UpdateBarRequest,
+            sync out responseDto : domain::BarManagement.BarResponse,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string,
+            sync out fault invalidRequest : string
+        );
+
+        ---
+        Delete a bar and its locally managed stock entries.
+
+        @required barId the unique id of the bar
+        ---
+        deleteBar(
+            sync barId : long,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string
+        );
+
+        internal getBarEntity(
+            sync barId : long,
+            sync out bar : domain::BarManagement.Bar,
+            sync out fault barNotFound : string
+        );
+
+        internal createBarResponse(
+            sync bar : domain::BarManagement.Bar,
+            sync out responseDto : domain::BarManagement.BarResponse
+        );
+	
+	---
+        Add a new beverage stock entry to a bar.
+
+        @required barId the unique id of the bar
+        @required requestDto the stock information to be added
+        ---
+        addStock(
+            sync barId : long,
+            sync requestDto : domain::BarManagement.AddStockRequest,
+            sync out responseDto : domain::BarManagement.BarResponse,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string,
+            sync out fault duplicateStock : string,
+            sync out fault invalidRequest : string
+        );
+
+        ---
+        Update quantity, threshold, name, and price of an existing beverage stock entry.
+
+        @required barId the unique id of the bar
+        @required beverageTypeId the id of the beverage type
+        @required requestDto the updated stock information
+        ---
+        updateStock(
+            sync barId : long,
+            sync beverageTypeId : long,
+            sync requestDto : domain::BarManagement.UpdateStockRequest,
+            sync out responseDto : domain::BarManagement.BarResponse,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string,
+            sync out fault beverageNotStocked : string,
+            sync out fault invalidRequest : string
+        );
+
+        ---
+        Remove a beverage stock entry from a bar.
+
+        @required barId the unique id of the bar
+        @required beverageTypeId the id of the beverage type
+        ---
+        removeStock(
+            sync barId : long,
+            sync beverageTypeId : long,
+            sync out responseDto : domain::BarManagement.BarResponse,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string,
+            sync out fault beverageNotStocked : string
+        );
+
+        internal validateStockOperation(
+            sync barId : long,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string
+        );
+
+	---
+        Check whether a specific beverage type is available at a bar.
+
+        @required internalApiKey the shared key for internal service communication
+        @required barId the unique id of the bar
+        @required beverageTypeId the id of the beverage type
+        ---
+        getAvailability(
+            sync internalApiKey : string,
+            sync barId : long,
+            sync beverageTypeId : long,
+            sync out responseDto : domain::BarManagement.AvailabilityResponse,
+            sync out fault invalidInternalApiKey : string,
+            sync out fault barNotFound : string,
+            sync out fault beverageNotStocked : string
+        );
+
+        ---
+        Record a sale for a beverage at the given bar and reduce the local stock.
+        If the remaining stock is below the restock threshold, a replenishment request is created.
+
+        @required internalApiKey the shared key for internal service communication
+        @required barId the unique id of the bar
+        @required requestDto the sale request containing purchase, visitor, beverage, and quantity data
+        ---
+        recordSale(
+            sync internalApiKey : string,
+            sync barId : long,
+            sync requestDto : domain::BarManagement.RecordSaleRequest,
+            sync out responseDto : domain::BarManagement.SaleResponse,
+            sync out fault invalidInternalApiKey : string,
+            sync out fault barNotFound : string,
+            sync out fault beverageNotStocked : string,
+            sync out fault insufficientStock : string,
+            sync out fault forbiddenVisitor : string
+        );
+
+        internal verifyInternalApiKey(
+            sync internalApiKey : string,
+            sync out fault invalidInternalApiKey : string
+        );
+
+        internal verifyVisitor(
+            sync visitorId : long,
+            sync out fault forbiddenVisitor : string
+        );
+
+        internal createReplenishmentIfRequired(
+            sync barId : long,
+            sync beverageTypeId : long,
+            sync out replenishmentResponseDto : domain::BarManagement.ReplenishmentRequestResponse
+        );
+
+	---
+        Receive a replenishment fulfillment for a bar and increase the local stock.
+        This operation is called by Warehouse Management or used by the simulation UI.
+
+        @required internalApiKey the shared key for internal service communication
+        @required barId the unique id of the bar
+        @required requestDto the delivered replenishment information
+        ---
+        receiveReplenishment(
+            sync internalApiKey : string,
+            sync barId : long,
+            sync requestDto : domain::BarManagement.ReceiveReplenishmentRequest,
+            sync out responseDto : domain::BarManagement.BarResponse,
+            sync out fault invalidInternalApiKey : string,
+            sync out fault barNotFound : string,
+            sync out fault replenishmentRequestNotFound : string,
+            sync out fault beverageNotStocked : string,
+            sync out fault invalidRequest : string
+        );
+
+        ---
+        Get all replenishment requests for a specific bar.
+
+        @required barId the unique id of the bar
+        ---
+        getReplenishmentRequests(
+            sync barId : long,
+            sync out responseDtos : domain::BarManagement.ReplenishmentRequestResponses,
+            sync out fault forbidden : string,
+            sync out fault barNotFound : string
+        );
+
+        internal hasOpenReplenishment(
+            sync barId : long,
+            sync beverageTypeId : long,
+            sync out result : boolean
+        );
+    }
+
+    
+
+
+    interface identityClient {
+        ---
+        Load user information from User Management for role verification.
+
+        @required userId the id of the user to verify
+        ---
+        internal getUser(
+            sync userId : long,
+            sync out responseDto : domain::BarManagement.UserResponse,
+            sync out fault userNotFound : string,
+            sync out fault userManagementUnavailable : string
+        );
+
+        internal requireAnyRole(
+            sync userId : long,
+            sync allowedRoles : string,
+            sync out fault forbidden : string,
+            sync out fault userManagementUnavailable : string
+        );
+    }
+
+    interface warehouseClient {
+        ---
+        Send a replenishment request to Warehouse Management after local stock falls below its threshold.
+
+        @required requestDto the replenishment request to be sent to Warehouse Management
+        ---
+        internal requestReplenishment(
+            sync requestDto : domain::BarManagement.WarehouseReplenishmentRequest,
+            sync out responseDto : domain::BarManagement.WarehouseReplenishmentResponse,
+            sync out fault warehouseUnavailable : string
+        );
+    }
+}

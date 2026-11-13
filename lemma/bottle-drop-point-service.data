@@ -1,0 +1,52 @@
+context BottleDropPointService version v1 {
+    aggregate BottleDropPointAggregate {
+        /*
+         * @Entity
+         * @Table(name = "drop_point")
+         */
+        structure BottleDropPoint aggregate entity {
+            /*
+             * @Id
+             * @GeneratedValue(strategy = GenerationType.IDENTITY)
+             */
+            long id identifier,
+
+            string location,
+            int maxCapacity,
+            int currentFillLevel
+        }
+
+        repository BottleDropPointRepository {
+        }
+    }
+
+    /*
+     * @Entity
+     * @Table(name = "bottle_return")
+     */
+    structure BottleReturn entity {
+        /*
+         * @Id
+         * @GeneratedValue(strategy = GenerationType.IDENTITY)
+         */
+        long id identifier,
+
+        int quantity,
+        string returnTime
+    }
+
+    /*
+     * @Entity
+     * @Table(name = "report_request")
+     */
+    structure ReportRequest entity {
+        /*
+         * @Id
+         * @GeneratedValue(strategy = GenerationType.IDENTITY)
+         */
+        long id identifier,
+
+        string reportTime,
+        boolean isResolved
+    }
+}

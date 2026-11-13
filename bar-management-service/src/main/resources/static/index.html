@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Bar Management Service</title>
+
+    <link
+            rel="stylesheet"
+            href="/css/styles.css"
+    >
+</head>
+
+<body>
+
+<header class="page-header">
+    <div>
+        <p class="eyebrow">
+            Bottle Drop Event System
+        </p>
+
+        <h1>Bar Management</h1>
+
+        <p class="subtitle">
+            Spring Boot, Spring MVC and REST demonstration interface
+        </p>
+    </div>
+
+    <div class="service-indicator">
+        <span
+                id="service-status-dot"
+                class="status-dot"
+        ></span>
+
+        <span id="service-status">
+            Checking service...
+        </span>
+    </div>
+</header>
+
+<main class="page-container">
+
+    <!-- =========================================================
+         CONFIGURATION
+         ========================================================= -->
+
+    <section class="panel configuration-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Demo configuration</h2>
+
+                <p>
+                    Enter a valid user ID from User Management and
+                    the internal API key used between microservices.
+                </p>
+            </div>
+        </div>
+
+        <form
+                id="config-form"
+                class="form-grid"
+        >
+            <label>
+                Current user ID
+                <input
+                        id="actor-id"
+                        type="number"
+                        min="1"
+                        step="1"
+                        required
+                >
+            </label>
+
+            <label>
+                Internal API key
+                <input
+                        id="internal-api-key"
+                        type="password"
+                        placeholder="dev-internal-key"
+                        autocomplete="off"
+                        required
+                >
+            </label>
+
+            <div class="form-actions">
+                <button
+                        type="submit"
+                        class="button primary"
+                >
+                    Save configuration
+                </button>
+            </div>
+        </form>
+
+        <p class="warning-text">
+            The internal API key is entered in the browser only for
+            demonstration purposes. A production application should
+            use a secure authentication mechanism such as OAuth2/JWT
+            or mutual TLS.
+        </p>
+    </section>
+
+    <div
+            id="message"
+            class="message hidden"
+            role="alert"
+            aria-live="polite"
+    ></div>
+
+    <!-- =========================================================
+         BAR LIST AND BAR FORM
+         ========================================================= -->
+
+    <section class="dashboard-grid">
+
+        <article class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Bars</h2>
+
+                    <p>
+                        View, select, edit and delete event bars.
+                    </p>
+                </div>
+
+                <button
+                        id="refresh-bars"
+                        type="button"
+                        class="button secondary"
+                >
+                    Refresh
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Stock entries</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="bars-body">
+                    <tr>
+                        <td colspan="4">
+                            No data loaded.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2 id="bar-form-title">
+                        Create bar
+                    </h2>
+
+                    <p>
+                        Creating and editing a bar requires the
+                        PLANNER role.
+                    </p>
+                </div>
+            </div>
+
+            <form
+                    id="bar-form"
+                    class="vertical-form"
+            >
+                <input
+                        id="bar-id"
+                        type="hidden"
+                >
+
+                <label>
+                    Name
+                    <input
+                            id="bar-name"
+                            type="text"
+                            maxlength="100"
+                            placeholder="Main Bar"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Description
+                    <textarea
+                            id="bar-description"
+                            maxlength="500"
+                            rows="3"
+                            placeholder="Bar next to the main stage"
+                    ></textarea>
+                </label>
+
+                <label>
+                    Location
+                    <input
+                            id="bar-location"
+                            type="text"
+                            maxlength="200"
+                            placeholder="Main Stage"
+                            required
+                    >
+                </label>
+
+                <div class="form-actions">
+                    <button
+                            id="bar-submit"
+                            type="submit"
+                            class="button primary"
+                    >
+                        Create bar
+                    </button>
+
+                    <button
+                            id="bar-reset"
+                            type="button"
+                            class="button secondary"
+                    >
+                        Clear
+                    </button>
+                </div>
+            </form>
+        </article>
+
+    </section>
+
+    <!-- =========================================================
+         SELECTED BAR STOCK TABLE
+         ========================================================= -->
+
+    <section class="panel selected-panel">
+        <div class="panel-heading">
+            <div>
+                <h2 id="selected-bar-title">
+                    Selected bar
+                </h2>
+
+                <p id="selected-bar-meta">
+                    Select a bar from the table.
+                </p>
+            </div>
+        </div>
+
+        <div
+                id="selected-placeholder"
+                class="empty-state"
+        >
+            No bar is currently selected.
+        </div>
+
+        <div
+                id="selected-content"
+                class="hidden"
+        >
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Beverage</th>
+                        <th>Type ID</th>
+                        <th>Unit price</th>
+                        <th>Quantity</th>
+                        <th>Threshold</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="stocks-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         STOCK FORM AND AVAILABILITY
+         ========================================================= -->
+
+    <section class="dashboard-grid">
+
+        <article class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2 id="stock-form-title">
+                        Add beverage stock
+                    </h2>
+
+                    <p>
+                        Select a bar before adding or editing stock.
+                    </p>
+                </div>
+            </div>
+
+            <form
+                    id="stock-form"
+                    class="vertical-form"
+            >
+                <input
+                        id="stock-edit-id"
+                        type="hidden"
+                >
+
+                <label>
+                    Beverage type ID
+                    <input
+                            id="stock-type-id"
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="5"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Beverage name
+                    <input
+                            id="stock-name"
+                            type="text"
+                            maxlength="100"
+                            placeholder="Cola"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Unit price
+                    <input
+                            id="stock-price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value="0.00"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Current quantity
+                    <input
+                            id="stock-quantity"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value="0"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Restock threshold
+                    <input
+                            id="stock-threshold"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value="20"
+                            required
+                    >
+                </label>
+
+                <div class="form-actions">
+                    <button
+                            id="stock-submit"
+                            type="submit"
+                            class="button primary"
+                    >
+                        Add stock
+                    </button>
+
+                    <button
+                            id="stock-reset"
+                            type="button"
+                            class="button secondary"
+                    >
+                        Clear
+                    </button>
+                </div>
+            </form>
+        </article>
+
+        <article class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Availability check</h2>
+
+                    <p>
+                        Simulates a synchronous REST request from
+                        the Purchasing microservice.
+                    </p>
+                </div>
+            </div>
+
+            <form
+                    id="availability-form"
+                    class="vertical-form"
+            >
+                <label>
+                    Beverage type ID
+                    <input
+                            id="availability-type-id"
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="5"
+                            required
+                    >
+                </label>
+
+                <button
+                        type="submit"
+                        class="button primary"
+                >
+                    Check availability
+                </button>
+            </form>
+
+            <pre
+                    id="availability-output"
+                    class="output-box"
+            >No request made.</pre>
+        </article>
+
+    </section>
+
+    <!-- =========================================================
+         SALE AND DELIVERY SIMULATION
+         ========================================================= -->
+
+    <section class="dashboard-grid">
+
+        <article class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Simulate purchase</h2>
+
+                    <p>
+                        Simulates the Purchasing microservice calling
+                        the Bar sale endpoint.
+                    </p>
+                </div>
+            </div>
+
+            <form
+                    id="sale-form"
+                    class="vertical-form"
+            >
+                <label>
+                    Purchase ID
+                    <div class="input-with-button">
+                        <input
+                                id="sale-purchase-id"
+                                type="number"
+                                min="1"
+                                step="1"
+                                required
+                        >
+
+                        <button
+                                id="generate-purchase-id"
+                                type="button"
+                                class="button secondary compact"
+                        >
+                            Generate
+                        </button>
+                    </div>
+                </label>
+
+                <label>
+                    Visitor ID
+                    <input
+                            id="sale-visitor-id"
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Beverage type ID
+                    <input
+                            id="sale-type-id"
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="5"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Quantity
+                    <input
+                            id="sale-quantity"
+                            type="number"
+                            min="1"
+                            step="1"
+                            value="1"
+                            required
+                    >
+                </label>
+
+                <button
+                        type="submit"
+                        class="button primary"
+                >
+                    Record sale
+                </button>
+            </form>
+
+            <pre
+                    id="sale-output"
+                    class="output-box"
+            >No sale recorded.</pre>
+        </article>
+
+        <article class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Receive replenishment</h2>
+
+                    <p>
+                        Simulates Warehouse Management confirming
+                        that beverages have been delivered.
+                    </p>
+                </div>
+            </div>
+
+            <form
+                    id="delivery-form"
+                    class="vertical-form"
+            >
+                <label>
+                    Replenishment request ID
+                    <input
+                            id="delivery-request-id"
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Beverage type ID
+                    <input
+                            id="delivery-type-id"
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="5"
+                            required
+                    >
+                </label>
+
+                <label>
+                    Delivered quantity
+                    <input
+                            id="delivery-quantity"
+                            type="number"
+                            min="1"
+                            step="1"
+                            value="50"
+                            required
+                    >
+                </label>
+
+                <button
+                        type="submit"
+                        class="button primary"
+                >
+                    Confirm delivery
+                </button>
+            </form>
+
+            <pre
+                    id="delivery-output"
+                    class="output-box"
+            >No delivery recorded.</pre>
+        </article>
+
+    </section>
+
+    <!-- =========================================================
+         REPLENISHMENT REQUESTS
+         ========================================================= -->
+
+    <section class="panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Replenishment requests</h2>
+
+                <p>
+                    Requests are automatically created when stock
+                    falls below its configured threshold.
+                </p>
+            </div>
+
+            <button
+                    id="refresh-requests"
+                    type="button"
+                    class="button secondary"
+            >
+                Refresh
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Beverage</th>
+                    <th>Type ID</th>
+                    <th>Price</th>
+                    <th>Requested quantity</th>
+                    <th>Status</th>
+                    <th>Requested at</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody id="requests-body">
+                <tr>
+                    <td colspan="8">
+                        Select a bar to view replenishment requests.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<script src="/js/app.js"></script>
+
+</body>
+</html>
+```

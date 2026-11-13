@@ -1,0 +1,142 @@
+/*
+ * BC-5 Visitor Purchasing
+ * Domain model for purchase-service
+ */
+
+context VisitorPurchasing version v1 {
+    aggregate Purchase {
+        /*
+         * @Entity
+         * @Table(name = "purchases")
+         */
+        structure Purchase aggregate entity {
+            /*
+             * @Id
+             * @GeneratedValue(strategy = GenerationType.IDENTITY)
+             */
+            long id identifier,
+
+            long visitorId,
+            long barId,
+            string timestamp,
+            double totalAmount,
+
+            /*
+             * @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
+             */
+            PurchaseItemList items
+        }
+
+        repository PurchaseRepository {
+        }
+    }
+
+    /*
+     * @Entity
+     * @Table(name = "purchase_items")
+     */
+    structure PurchaseItem entity {
+        /*
+         * @Id
+         * @GeneratedValue(strategy = GenerationType.IDENTITY)
+         */
+        long id identifier,
+
+        /*
+         * @Embedded
+         */
+        BeverageTypeInfo beverageType part,
+
+        int quantity,
+        double priceAtPurchase
+    }
+
+    /*
+     * @Embeddable
+     */
+    structure BeverageTypeInfo valueObject {
+        long beverageTypeId,
+        string name,
+        string description
+    }
+
+    listtype PurchaseItemList {
+        PurchaseItem
+    }
+
+    listtype PurchaseItemRequestList {
+        PurchaseItemRequest
+    }
+
+    listtype UpdatePurchaseItemRequestList {
+        UpdatePurchaseItemRequest
+    }
+
+    listtype PurchaseItemResponseList {
+        PurchaseItemResponse
+    }
+
+    structure CreatePurchaseRequest {
+        long visitorId,
+        long barId,
+        PurchaseItemRequestList items
+    }
+
+    structure UpdatePurchaseRequest {
+        long visitorId,
+        long barId,
+        UpdatePurchaseItemRequestList items
+    }
+
+    structure PurchaseItemRequest {
+        long beverageTypeId,
+        string beverageName,
+        string beverageDescription,
+        int quantity,
+        double priceAtPurchase
+    }
+
+    structure UpdatePurchaseItemRequest {
+        long beverageTypeId,
+        string beverageName,
+        string beverageDescription,
+        int quantity,
+        double priceAtPurchase
+    }
+
+    structure PurchaseResponse {
+        long id,
+        long visitorId,
+        long barId,
+        string timestamp,
+        double totalAmount,
+        PurchaseItemResponseList items
+    }
+
+    structure PurchaseItemResponse {
+        long id,
+        long beverageTypeId,
+        string beverageName,
+        string beverageDescription,
+        int quantity,
+        double priceAtPurchase
+    }
+
+    structure ApiError {
+        string timestamp,
+        int status,
+        string error,
+        string message
+    }
+
+    structure ApiErrorResponse {
+        string timestamp,
+        int status,
+        string error,
+        string message,
+        string path
+    }
+
+    structure PurchaseService domainService {
+    }
+}

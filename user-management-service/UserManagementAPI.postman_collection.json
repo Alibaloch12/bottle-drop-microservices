@@ -1,0 +1,75 @@
+{
+	"info": {
+		"_postman_id": "b3e8e2b0-9a1d-4e9b-b0b0-3c1e5a5e3d1a",
+		"name": "Bottle Drop - User Management API",
+		"description": "API collection for testing the User Management Service.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Get All Users (GET)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/users",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "users"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Create New User (POST)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Ali Murad\",\n  \"email\": \"ali@test.com\",\n  \"password\": \"MySecurePass123\",\n  \"role\": \"BARTENDER\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/users",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "users"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Authenticate / Login (POST)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"ali@test.com\",\n  \"password\": \"MySecurePass123\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/users/login",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "users", "login"]
+				}
+			},
+			"response": []
+		}
+	]
+}

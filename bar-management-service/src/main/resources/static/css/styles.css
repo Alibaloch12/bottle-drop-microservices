@@ -1,0 +1,640 @@
+```css
+:root {
+    color-scheme: light;
+
+    --background: #f3f6fa;
+    --surface: #ffffff;
+    --surface-muted: #f8fafc;
+
+    --border: #d8e0e8;
+    --border-strong: #c2ccd7;
+
+    --text: #17202a;
+    --text-muted: #64748b;
+
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+
+    --success: #15803d;
+    --success-background: #dcfce7;
+
+    --warning: #b45309;
+    --warning-background: #ffedd5;
+
+    --info: #0369a1;
+    --info-background: #e0f2fe;
+
+    --shadow:
+        0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    background: var(--background);
+    color: var(--text);
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+button {
+    touch-action: manipulation;
+}
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+
+    padding:
+        2rem
+        max(1.5rem, calc((100vw - 1400px) / 2));
+
+    background: #0f172a;
+    color: white;
+}
+
+.page-header h1 {
+    margin: 0.2rem 0;
+
+    font-size:
+        clamp(1.9rem, 3vw, 2.8rem);
+}
+
+.eyebrow {
+    margin: 0;
+
+    color: #93c5fd;
+
+    font-size: 0.8rem;
+    font-weight: 750;
+
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.subtitle {
+    margin: 0;
+    color: #cbd5e1;
+}
+
+.service-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+
+    border-radius: 50%;
+
+    background: #94a3b8;
+}
+
+.status-dot.online {
+    background: #22c55e;
+}
+
+.status-dot.offline {
+    background: #ef4444;
+}
+
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+
+.page-container {
+    width: min(1400px, calc(100% - 2rem));
+
+    margin:
+        2rem auto
+        4rem;
+}
+
+.dashboard-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 1.5rem;
+
+    margin-bottom: 1.5rem;
+}
+
+.configuration-panel,
+.selected-panel {
+    margin-bottom: 1.5rem;
+}
+
+/* =========================================================
+   PANELS
+   ========================================================= */
+
+.panel {
+    padding: 1.4rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+
+    background: var(--surface);
+
+    box-shadow: var(--shadow);
+}
+
+.panel-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+
+    margin-bottom: 1.2rem;
+}
+
+.panel-heading h2 {
+    margin:
+        0
+        0
+        0.25rem;
+
+    font-size: 1.2rem;
+}
+
+.panel-heading p {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 1rem;
+}
+
+.vertical-form {
+    display: grid;
+    gap: 1rem;
+}
+
+label {
+    display: grid;
+    gap: 0.45rem;
+
+    color: #334155;
+
+    font-size: 0.88rem;
+    font-weight: 650;
+}
+
+input,
+textarea {
+    width: 100%;
+
+    padding: 0.75rem 0.85rem;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 0.55rem;
+
+    background: white;
+    color: var(--text);
+
+    outline: none;
+
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+input:disabled,
+textarea:disabled {
+    background: #e2e8f0;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.input-with-button {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.input-with-button input {
+    flex: 1;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+button.button,
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 2.6rem;
+
+    padding: 0.7rem 1.1rem;
+
+    border-radius: 0.55rem;
+
+    cursor: pointer;
+
+    font-weight: 700;
+    font-size: 0.9rem;
+
+    text-decoration: none;
+
+    transition:
+        background 150ms ease,
+        color 150ms ease,
+        border-color 150ms ease,
+        transform 150ms ease,
+        opacity 150ms ease;
+}
+
+button.button:hover,
+.button:hover {
+    transform: translateY(-1px);
+}
+
+button.button:active,
+.button:active {
+    transform: translateY(0);
+}
+
+button.button:disabled,
+.button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+
+/* Primary submit buttons */
+button.button.primary,
+.button.primary {
+    border: 1px solid var(--primary);
+
+    background-color: var(--primary) !important;
+    color: #000000 !important;
+}
+
+button.button.primary:hover,
+.button.primary:hover {
+    border-color: var(--primary-hover);
+
+    background-color: var(--primary-hover) !important;
+    color: #000000 !important;
+}
+
+/* Secondary buttons like Clear, Refresh, Generate */
+button.button.secondary,
+.button.secondary {
+    border: 1px solid var(--border-strong);
+
+    background-color: #e2e8f0 !important;
+    color: #17202a !important;
+}
+
+button.button.secondary:hover,
+.button.secondary:hover {
+    border-color: #94a3b8;
+
+    background-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+/* Danger buttons */
+button.button.danger,
+.button.danger {
+    border: 1px solid var(--danger);
+
+    background-color: var(--danger) !important;
+    color: #000000 !important;
+}
+
+button.button.danger:hover,
+.button.danger:hover {
+    border-color: var(--danger-hover);
+
+    background-color: var(--danger-hover) !important;
+    color: #000000 !important;
+}
+
+button.button.compact,
+.button.compact {
+    min-height: 2.1rem;
+
+    padding: 0.52rem 0.72rem;
+
+    font-size: 0.78rem;
+}
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 0.8rem 0.65rem;
+
+    border-bottom: 1px solid var(--border);
+
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    color: #475569;
+
+    font-size: 0.74rem;
+    font-weight: 750;
+
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+td {
+    font-size: 0.88rem;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+}
+
+.table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.selected-row {
+    background: #eff6ff;
+}
+
+.selected-row:hover {
+    background: #e6f0ff;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 0.25rem 0.55rem;
+
+    border-radius: 999px;
+
+    font-size: 0.74rem;
+    font-weight: 750;
+
+    white-space: nowrap;
+}
+
+.status-badge.ok {
+    background: var(--success-background);
+    color: var(--success);
+}
+
+.status-badge.warning {
+    background: var(--warning-background);
+    color: var(--warning);
+}
+
+.status-badge.info {
+    background: var(--info-background);
+    color: var(--info);
+}
+
+.status-badge.error {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* =========================================================
+   FEEDBACK MESSAGES
+   ========================================================= */
+
+.message {
+    margin-bottom: 1.5rem;
+    padding: 0.9rem 1rem;
+
+    border-radius: 0.6rem;
+
+    font-weight: 650;
+}
+
+.message.success {
+    border: 1px solid #86efac;
+
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.message.error {
+    border: 1px solid #fca5a5;
+
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.message.info {
+    border: 1px solid #7dd3fc;
+
+    background: #f0f9ff;
+    color: #075985;
+}
+
+.warning-text {
+    margin:
+        1rem
+        0
+        0;
+
+    color: var(--warning);
+
+    font-size: 0.82rem;
+}
+
+/* =========================================================
+   EMPTY AND OUTPUT AREAS
+   ========================================================= */
+
+.empty-state {
+    padding: 2rem;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.65rem;
+
+    background: var(--surface-muted);
+    color: var(--text-muted);
+
+    text-align: center;
+}
+
+.output-box {
+    min-height: 7rem;
+
+    margin:
+        1rem
+        0
+        0;
+
+    padding: 1rem;
+
+    overflow: auto;
+
+    border-radius: 0.6rem;
+
+    background: #0f172a;
+    color: #dbeafe;
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+    font-size: 0.78rem;
+
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.monospace {
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+    font-size: 0.76rem;
+}
+
+.price {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 1000px) {
+    .dashboard-grid,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .page-container {
+        width: min(100% - 1rem, 1400px);
+
+        margin-top: 1rem;
+    }
+
+    .panel {
+        padding: 1rem;
+    }
+
+    .panel-heading {
+        flex-direction: column;
+    }
+
+    .input-with-button {
+        flex-direction: column;
+    }
+
+    th,
+    td {
+        padding: 0.7rem 0.5rem;
+    }
+}
+```
